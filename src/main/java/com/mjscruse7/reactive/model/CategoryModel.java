@@ -11,10 +11,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "categorias")
+@Document(collection = "categories")
 public class CategoryModel {
 
     @Id
     private String id;
     private String name;
+
+    public CategoryModel(String name) {
+        this.name = name;
+    }
 }

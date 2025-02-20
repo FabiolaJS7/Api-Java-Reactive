@@ -1,6 +1,6 @@
 package com.mjscruse7.reactive;
 
-import com.mjscruse7.reactive.model.Product;
+import com.mjscruse7.reactive.model.ProductModel;
 import com.mjscruse7.reactive.repository.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +30,9 @@ public class ProjectProgrammationReactiveApplication implements CommandLineRunne
 		reactiveMongoTemplate.dropCollection("products").subscribe();
 
 		Flux
-				.just(new Product("TV Panasonic", 456.00),
-						new Product("Celular", 234.98),
-						new Product("televisor", 123.34))
+				.just(new ProductModel("TV Panasonic", 456.00),
+						new ProductModel("Celular", 234.98),
+						new ProductModel("televisor", 123.34))
 				.flatMap(product -> productRepository.save(product))
 				.subscribe(productMono -> log.info("Inserted product: {}", productMono.getId() + " " + productMono.getName()));
 	}

@@ -1,12 +1,10 @@
 package com.mjscruse7.reactive.controllers;
 
-import com.mjscruse7.reactive.model.Product;
-import com.mjscruse7.reactive.repository.ProductRepository;
+import com.mjscruse7.reactive.model.ProductModel;
 import com.mjscruse7.reactive.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -32,7 +30,7 @@ public class ProductController {
 
     @GetMapping({"/listar", "/"})
     public String list(Model model) {
-        Flux<Product> productFlux = productService.findAll()
+        Flux<ProductModel> productFlux = productService.findAll()
                 .map(product -> {
                     product.setName(product.getName().toUpperCase());
                     return product;
@@ -47,7 +45,7 @@ public class ProductController {
 
     @GetMapping("/listar-full")
     public String listFull(Model model) {
-        Flux<Product> productFlux = productService.findAllWithNameUppercaseRepeat();
+        Flux<ProductModel> productFlux = productService.findAllWithNameUppercaseRepeat();
         model.addAttribute("productos", productFlux);
         model.addAttribute("titulo", "Listado de productos listFull");
         return "listar";
@@ -55,7 +53,7 @@ public class ProductController {
 
     @GetMapping("/listar-datadriver")
     public String listDataDriver(Model model) {
-        Flux<Product> productFlux = productService.findAllWithNameUppercase()
+        Flux<ProductModel> productFlux = productService.findAllWithNameUppercase()
                 .delayElements(Duration.ofSeconds(1));
 
         productFlux.subscribe(product -> log.info("Product listDataDriver: {}", product.getName()));
@@ -68,7 +66,7 @@ public class ProductController {
 
     @GetMapping("/listar-chunked")
     public String listChunked(Model model) {
-        Flux<Product> productFlux = productService.findAll()
+        Flux<ProductModel> productFlux = productService.findAll()
                 .map(product -> {
                     product.setName(product.getName().toUpperCase());
                     return product;
@@ -81,13 +79,13 @@ public class ProductController {
 
     @GetMapping("/form")
     public Mono<String> create(Model model) {
-        model.addAttribute("product", new Product());
+        model.addAttribute("product", new ProductModel());
         model.addAttribute("titulo", "Formulario de producto");
         return Mono.just("form");
     }
 
     @PostMapping("/form")
-    public Mono<String> save(@Valid Product product, BindingResult result, Model model, SessionStatus status) {
+    public Mono<String> save(@Valid ProductModel product, BindingResult result, Model model, SessionStatus status) {
         if (result.hasErrors()) {
             model.addAttribute("titulo", "Errores en formulario del producto");
             model.addAttribute("botón", "Guardar");
@@ -108,9 +106,9 @@ public class ProductController {
 
     @GetMapping("/form/{id}")
     public Mono<String> edit(@PathVariable ("id") String id, Model model) {
-        Mono<Product> productMono = productService.findById(id).doOnNext(p -> {
+        Mono<ProductModel> productMono = productService.findById(id).doOnNext(p -> {
             log.info("Product edited: {}, Id: {}", p.getName(), p.getId());
-        }).defaultIfEmpty(new Product());
+        }).defaultIfEmpty(new ProductModel());
 
         model.addAttribute("titulo", "Editar producto");
         model.addAttribute("product", productMono);
@@ -125,7 +123,7 @@ public class ProductController {
                     log.info("Product edited: {}, Id: {}", product.getName(), product.getId());
                     model.addAttribute("titulo", "Editar producto");
                     model.addAttribute("product", product);
-                }).defaultIfEmpty(new Product())
+                }).defaultIfEmpty(new ProductModel())
                 .flatMap(product -> {
                     if (product.getName() == null) {
                         return Mono.error(new InterruptedException("No existe el productio"));
@@ -140,7 +138,7 @@ public class ProductController {
     @GetMapping("/eliminar/{id}")
     public Mono<String> delete(@PathVariable String id) {
         return productService.findById(id)
-                .defaultIfEmpty(new Product())
+                .defaultIfEmpty(new ProductModel())
                 .flatMap(product -> {
                     if (product.getId() == null) {
                         return Mono.error(new InterruptedException("No existe el producto"));

@@ -1,6 +1,6 @@
 package com.mjscruse7.reactive.service.impl;
 
-import com.mjscruse7.reactive.model.Product;
+import com.mjscruse7.reactive.model.ProductModel;
 import com.mjscruse7.reactive.repository.ProductRepository;
 import com.mjscruse7.reactive.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -15,12 +15,12 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     @Override
-    public Flux<Product> findAll() {
+    public Flux<ProductModel> findAll() {
         return productRepository.findAll();
     }
 
     @Override
-    public Flux<Product> findAllWithNameUppercase() {
+    public Flux<ProductModel> findAllWithNameUppercase() {
         return productRepository.findAll().map(product -> {
             product.setName(product.getName().toUpperCase());
             return product;
@@ -28,22 +28,22 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<Product> findAllWithNameUppercaseRepeat() {
+    public Flux<ProductModel> findAllWithNameUppercaseRepeat() {
         return findAllWithNameUppercase().repeat(5000);
     }
 
     @Override
-    public Mono<Product> findById(String id) {
+    public Mono<ProductModel> findById(String id) {
         return productRepository.findById(id);
     }
 
     @Override
-    public Mono<Product> save(Product product) {
+    public Mono<ProductModel> save(ProductModel product) {
         return productRepository.save(product);
     }
 
     @Override
-    public Mono<Void> delete(Product product) {
+    public Mono<Void> delete(ProductModel product) {
         return productRepository.delete(product);
     }
 }

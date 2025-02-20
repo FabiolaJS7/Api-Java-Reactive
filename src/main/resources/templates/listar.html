@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo}"></title>
+</head>
+<body>
+<h1 th:text="${titulo}"></h1>
+<a th:href="@{/form}"> crear + </a>
+
+<table>
+    <thead>
+    <tr>
+        <th>id</th>
+        <th>nombre</th>
+        <th>precio</th>
+        <th>editar</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="producto: ${productos}">
+        <td th:text="${producto.id}"></td>
+        <td th:text="${producto.name}"></td>
+        <td th:text="${producto.price}"></td>
+        <td><a th:href="@{'/form/' + ${producto.id}}">Editar</a></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

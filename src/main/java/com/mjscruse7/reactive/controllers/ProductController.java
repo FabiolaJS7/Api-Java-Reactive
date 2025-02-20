@@ -1,6 +1,8 @@
 package com.mjscruse7.reactive.controllers;
 
+import com.mjscruse7.reactive.model.CategoryModel;
 import com.mjscruse7.reactive.model.ProductModel;
+import com.mjscruse7.reactive.service.CategoryService;
 import com.mjscruse7.reactive.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -8,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.support.SessionStatus;
 import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
 import reactor.core.publisher.Flux;
@@ -27,6 +26,12 @@ import java.util.Date;
 public class ProductController {
 
     private ProductService productService;
+    private CategoryService categoryService;
+
+    @ModelAttribute("categorias")
+    public Flux<CategoryModel> categories() {
+        return categoryService.findAll();
+    }
 
     @GetMapping({"/listar", "/"})
     public String list(Model model) {

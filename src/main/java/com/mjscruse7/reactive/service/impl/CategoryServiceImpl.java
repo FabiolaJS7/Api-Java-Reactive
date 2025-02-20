@@ -16,7 +16,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Flux<CategoryModel> findAll() {
-        return categoryRepository.findAll();
+        Flux<CategoryModel> categoryFlux = categoryRepository.findAll();
+        return categoryFlux;
     }
 
     @Override

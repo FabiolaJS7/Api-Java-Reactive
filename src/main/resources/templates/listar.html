@@ -16,6 +16,7 @@
         <th>nombre</th>
         <th>precio</th>
         <th>editar</th>
+        <th>Fecha</th>
     </tr>
     </thead>
     <tbody>
@@ -23,6 +24,8 @@
         <td th:text="${producto.id}"></td>
         <td th:text="${producto.name}"></td>
         <td th:text="${producto.price}"></td>
+        <td th:text="${producto.createdAt}"></td>
+        <td th:text="${producto.category.name}"></td>
         <td><a th:href="@{'/form/' + ${producto.id}}">Editar</a></td>
         <td> <a th:href="@{'/eliminar/' + ${producto.id}}" onclick="return confirm('Estas seguro que deseas eliminar?');">Eliminar </a> </td>
     </tr>

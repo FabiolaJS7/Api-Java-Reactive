@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "categories")
 public class CategoryModel {
@@ -19,6 +18,11 @@ public class CategoryModel {
     private String name;
 
     public CategoryModel(String name) {
+        this.name = name;
+    }
+
+    public CategoryModel(String id, String name) {
+        this.id = id;
         this.name = name;
     }
 }

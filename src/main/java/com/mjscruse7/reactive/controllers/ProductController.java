@@ -3,11 +3,13 @@ package com.mjscruse7.reactive.controllers;
 import com.mjscruse7.reactive.model.Product;
 import com.mjscruse7.reactive.repository.ProductRepository;
 import com.mjscruse7.reactive.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.Date;
 
 @SessionAttributes("product")
 @Controller
@@ -84,11 +87,23 @@ public class ProductController {
     }
 
     @PostMapping("/form")
-    public Mono<String> save(Product product, SessionStatus status) {
-        status.setComplete();
-        return productService.save(product).doOnNext(p -> {
-            log.info("Product saved: {}, Id: {}", p.getName(), p.getId());
-        }).thenReturn("redirect:/listar");
+    public Mono<String> save(@Valid Product product, BindingResult result, Model model, SessionStatus status) {
+        if (result.hasErrors()) {
+            model.addAttribute("titulo", "Errores en formulario del producto");
+            model.addAttribute("botón", "Guardar");
+            return Mono.just("form");
+        } else {
+            status.setComplete();
+
+            if (product.getCreatedAt() == null) {
+                product.setCreatedAt(new Date());
+            }
+
+            return productService.save(product).doOnNext(p -> {
+                log.info("Product saved: {}, Id: {}", p.getName(), p.getId());
+            }).thenReturn("redirect:/listar?success=producto+guardad+con+exito");
+        }
+
     }
 
     @GetMapping("/form/{id}")
@@ -118,6 +133,24 @@ public class ProductController {
                     return Mono.just(product);
                 })
                 .then(Mono.just("form"))
+                .onErrorResume(ex -> Mono.just("redirect:/listar?error=no+existe+el+producto"));
+
+    }
+
+    @GetMapping("/eliminar/{id}")
+    public Mono<String> delete(@PathVariable String id) {
+        return productService.findById(id)
+                .defaultIfEmpty(new Product())
+                .flatMap(product -> {
+                    if (product.getId() == null) {
+                        return Mono.error(new InterruptedException("No existe el producto"));
+                    }
+                    return Mono.just(product);
+                })
+                .flatMap(product -> {
+                    log.info("Product eliminado: {}, Id: {}", product.getName(), product.getId());
+            return productService.delete(product);
+        }).then(Mono.just("redirect:/listar?success=product+eliminado+con+exito"))
                 .onErrorResume(ex -> Mono.just("redirect:/listar?error=no+existe+el+producto"));
 
     }

@@ -1,5 +1,7 @@
 package com.mjscruse7.reactive.model;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -14,7 +16,9 @@ public class Product {
 
     @Id
     private String id;
+    @NotEmpty
     private String name;
+    @NotNull
     private Double price;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createdAt;

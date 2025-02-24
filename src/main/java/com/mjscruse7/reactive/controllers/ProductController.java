@@ -1,5 +1,6 @@
 package com.mjscruse7.reactive.controllers;
 
+import com.mjscruse7.reactive.config.PhotoConfig;
 import com.mjscruse7.reactive.model.CategoryModel;
 import com.mjscruse7.reactive.model.ProductModel;
 import com.mjscruse7.reactive.service.CategoryService;
@@ -7,6 +8,8 @@ import com.mjscruse7.reactive.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,8 +19,10 @@ import org.thymeleaf.spring6.context.webflux.ReactiveDataDriverContextVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.File;
 import java.time.Duration;
 import java.util.Date;
+import java.util.UUID;
 
 @SessionAttributes("product")
 @Controller
@@ -27,6 +32,9 @@ public class ProductController {
 
     private ProductService productService;
     private CategoryService categoryService;
+    private PhotoConfig photoConfig;
+
+
 
     @ModelAttribute("categorias")
     public Flux<CategoryModel> categories() {
@@ -90,7 +98,8 @@ public class ProductController {
     }
 
     @PostMapping("/form")
-    public Mono<String> save(@Valid ProductModel product, BindingResult result, Model model, SessionStatus status) {
+    public Mono<String> save(@Valid ProductModel product, BindingResult result, Model model,
+                             @RequestPart ("file") FilePart file, SessionStatus status) {
         if (result.hasErrors()) {
             model.addAttribute("titulo", "Errores en formulario del producto");
             model.addAttribute("botón", "Guardar");
@@ -98,12 +107,33 @@ public class ProductController {
         } else {
             status.setComplete();
 
-            if (product.getCreatedAt() == null) {
-                product.setCreatedAt(new Date());
-            }
+            Mono<CategoryModel> categoryModelMono = categoryService.findCategoryById(product.getCategory().getId());
 
-            return productService.save(product).doOnNext(p -> {
-                log.info("Product saved: {}, Id: {}", p.getName(), p.getId());
+            return categoryModelMono.flatMap(categoryModel -> {
+                if (product.getCreatedAt() == null) {
+                    product.setCreatedAt(new Date());
+                }
+
+                if (!file.filename().isEmpty()) {
+                    product.setPhoto(UUID.randomUUID().toString() + "-" + file.filename()
+                            .replace(" ", "")
+                            .replace(":", "")
+                            .replace("\\", "")
+                    );
+                }
+
+                product.setCategory(categoryModel);
+                return productService.save(product);
+
+            }).doOnNext(productModel -> {
+                log.info("Category assigned: {} , Id cat: {}", productModel.getCategory().getName(), productModel.getCategory().getId());
+                log.info("Product saved: {}, Id: {}", productModel.getName(), productModel.getId());
+            }).flatMap(productModel -> {
+                if (!file.filename().isEmpty()) {
+                    return file.transferTo(new File(photoConfig.getUploadPath() + productModel.getPhoto()));
+                }
+
+                return Mono.empty();
             }).thenReturn("redirect:/listar?success=producto+guardad+con+exito");
         }
 
@@ -152,8 +182,8 @@ public class ProductController {
                 })
                 .flatMap(product -> {
                     log.info("Product eliminado: {}, Id: {}", product.getName(), product.getId());
-            return productService.delete(product);
-        }).then(Mono.just("redirect:/listar?success=product+eliminado+con+exito"))
+                    return productService.delete(product);
+                }).then(Mono.just("redirect:/listar?success=product+eliminado+con+exito"))
                 .onErrorResume(ex -> Mono.just("redirect:/listar?error=no+existe+el+producto"));
 
     }

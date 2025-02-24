@@ -1,5 +1,7 @@
 package com.mjscruse7.reactive.model;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class CategoryModel {
 
     @Id
+    @NotEmpty
     private String id;
     private String name;
 

@@ -1,5 +1,6 @@
 package com.mjscruse7.reactive.model;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -26,7 +27,9 @@ public class ProductModel {
     private Double price;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date createdAt;
+    @Valid
     private CategoryModel category;
+    private String photo;
 
 
     public ProductModel(String name, Double price) {

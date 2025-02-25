@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo}"></title>
+</head>
+<body>
+<h1 th:text="${titulo}"></h1>
+<a th:href="@{/listar}"> volver </a>
+
+<div>
+    <div>
+        <img th:if="${product.photo != null && #strings.length(product.photo) > 0}"
+
+             style="max-width: 25%;"
+
+             th:src="@{'/uploads/img/' + ${product.photo}}" th:alt="${product.name}">
+    </div>
+
+    <ul>
+        <li th:text="${product.name}"></li>
+        <li th:text="'Id:' + ${product.id}"></li>
+        <li th:text="'Precio:' + ${#numbers.formatCurrency(product.price)}"></li>
+        <li th:text="'Fecha:' + ${#calendars.format(product.createdAt, 'dd/MM/yyyy')}"></li>
+    </ul>
+</div>
+
+</body>
+</html>
